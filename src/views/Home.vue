@@ -8,7 +8,7 @@
         <v-row v-if="!signedInState" align="center" justify="center">
           <v-col cols="3" sm="1"><v-btn outlined to="/login">Login</v-btn></v-col>
           <v-col cols="3" sm="1"><v-btn outlined to="/signup">Signup</v-btn></v-col>
-          <v-col cols="3" sm="1"><v-btn @click="showInfo = !showInfo" outlined>Info</v-btn></v-col>
+          <v-col cols="3" sm="1"><v-btn @click="showInfo = !showInfo" outlined color="error">Info</v-btn></v-col>
         </v-row>
         <v-row v-else align="center" justify="center">
           <v-btn outlined to="/settings">Settings</v-btn>
