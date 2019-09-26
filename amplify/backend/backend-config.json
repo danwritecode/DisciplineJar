@@ -1,0 +1,9 @@
+{
+	"auth": {
+		"disciplinejar696fb8bf": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": []
+		}
+	}
+}
