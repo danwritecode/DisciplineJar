@@ -1,20 +1,24 @@
 <template>
      <v-container>
-         <v-row align-content="center" justify="center">
+         <v-progress-linear v-if="!form.Personal_Message_Tx" :indeterminate="!form.Personal_Message_Tx"></v-progress-linear>
+         <v-row v-else align-content="center" justify="center">
              <v-col>
                  <v-card>
                      <v-card-title>Settings</v-card-title>
                      <v-card-text>
                          <p>Modify what things you want to receive in your text. Also add a personal touch by including a mantra or reminder that is important to you.</p>
                          <v-checkbox v-model="disciplineJar" label="Discipline Jar" disabled></v-checkbox>
-                         <v-checkbox v-model="motivationalVideo" label="Motivational Video"></v-checkbox>
-                         <v-checkbox v-model="workout" label="Workout Plan"></v-checkbox>
-                         <v-textarea v-model="customMessage" label="Enter a personalized mantra..." outlined></v-textarea>
+                         <v-checkbox v-model="form.Receive_MotivtnlVid_Bool" label="Motivational Video"></v-checkbox>
+                         <v-checkbox v-model="form.Receive_Workout_Bool" label="Workout Plan"></v-checkbox>
+                         <v-textarea v-model="form.Personal_Message_Tx" label="Enter a personalized mantra..." outlined></v-textarea>
                      </v-card-text>
                      <v-container>
-                         <v-card-actions>
-                             <v-btn outlined @click="saveSettings()">Save</v-btn>
-                         </v-card-actions>
+                        <v-alert v-if="successPost" type="success">Settings successfully saved!</v-alert>
+                        <v-alert v-if="errorPost" type="error">Uh oh, there was an issue</v-alert>
+                        <v-progress-linear v-if="posting" :indeterminate="posting"></v-progress-linear>
+                        <v-card-actions>
+                            <v-btn outlined @click="saveSettings()">Save</v-btn>
+                        </v-card-actions>
                      </v-container>
                  </v-card>
              </v-col>
@@ -28,15 +32,20 @@ import { Auth } from 'aws-amplify'
 export default {
     data() {
         return {
+            form: {
+                Personal_Message_Tx: null,
+                Receive_MotivtnlVid_Bool: false,
+                Receive_Workout_Bool: false
+            },
             disciplineJar: true,
-            motivationalVideo: false,
-            workout: false,
-            customMessage: null,
             authedUser: {
                 user: null,
                 userId: null, 
                 jwtToken: null
-            }
+            },
+            posting: false,
+            successPost: false,
+            errorPost: false
         }
     },
     beforeCreate() {
@@ -44,13 +53,15 @@ export default {
             .then(user => {
                 this.authedUser.user = user,
                 this.authedUser.jwtToken = user.signInUserSession.idToken.jwtToken,
-                this.authedUser.userId = this.tactUserId = user.attributes.sub
-                // this.getSettings()
+                this.authedUser.userId = this.tactUserId = user.attributes.sub,
+                this.getSettings()
             })
             .catch(err => console.log(err))
     },
     methods: {
         saveSettings() {
+            this.posting = true
+
             const apiUrl = this.$store.state.baseURL
             const env = this.$store.state.env
 
@@ -59,10 +70,20 @@ export default {
                     'Authorization': this.authedUser.jwtToken
                     }
                 }
+            
+            const userSettings = {'UserId': this.authedUser.userId,
+                                    'Settings': {
+                                        'ReceiveMotivationalVideo': this.form.Receive_MotivtnlVid_Bool,
+                                        'ReceiveWorkoutPlan': this.form.Receive_Workout_Bool,
+                                        'PersonalizedMessage': this.form.Personal_Message_Tx
+                                    }}
 
-            axios.post(apiUrl + env + 'marketplace/listings', config)
-                .then(response => (console.log(response.data)))
-                .catch(error => (console.log(error)))
+            axios.post(apiUrl + env + 'user/settings', JSON.stringify(userSettings), config)
+                .then(response => (console.log(response.data), 
+                                    this.posting = false,
+                                    this.successPost = true,
+                                    setTimeout(() => (this.successPost = false), 1500)))
+                .catch(error => (console.log(error), this.errorPost = true))
         },
         getSettings() {
             const apiUrl = this.$store.state.baseURL
@@ -74,8 +95,8 @@ export default {
                     }
                 }
 
-            axios.get(apiUrl + env + 'marketplace/listings', config)
-                .then(response => (console.log(response.data)))
+            axios.get(apiUrl + env + 'user/settings?User_Id='+this.authedUser.userId, config)
+                .then(response => (console.log(response.data), this.form = response.data))
                 .catch(error => (console.log(error)))
         }
     }
