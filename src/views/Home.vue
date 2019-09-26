@@ -16,12 +16,12 @@
         <br>
         <v-row v-if="showInfo" align="center" justify="center">
           <v-container>
-            <p>This app was inspired by David Goggins and the idea of his "Cookie Jar". The Cookie Jar is a place you go to mentally
-              where you draw some sort of inspiration to keep moving through a hard time.
+            <p>This app was inspired by David Goggins and the idea of his "Cookie Jar". The Cookie Jar is a place in your mind 
+              that you draw from to get you through a hard time.
             </p>
             <p>I liked this concept so I started creating my own version which I saved in my iPhone notes and called "Discpline Jar".
-              The focus of the Discipline Jar is slightly different than David's Cookie Jar. The Discipline Jar contains reasons why 
-              you should be disciplined.
+              The idea of the Discipline Jar is slightly different than David's Cookie Jar. The Discipline Jar contains reasons why 
+              you should be disciplined and encourages you to keep on the hard path.
             </p>
             <p>
               This is app was created by and is maintained by Dan Nelson. You can find/follow me on twitter at @danatdev.
