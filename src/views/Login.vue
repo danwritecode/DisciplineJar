@@ -7,7 +7,7 @@
 
                 <v-card-text id="cardForm">
                         <v-text-field
-                            label="Phone Number"
+                            label="Phone Number (+12223334444)"
                             outlined
                             type="text"
                             v-model="form.username"

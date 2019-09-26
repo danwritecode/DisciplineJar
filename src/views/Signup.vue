@@ -8,7 +8,7 @@
 
                     <v-card-text id="cardForm">
                             <v-text-field
-                                label="Phone Number"
+                                label="Phone Number (+12223334444)"
                                 solo
                                 type="text"
                                 v-model="signUpForm.username"
