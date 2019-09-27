@@ -12,7 +12,7 @@
         </v-row>
         <v-row v-else align="center" justify="center">
           <v-btn class="homeBttns" outlined to="/settings">Settings</v-btn>
-          <v-btn class="homeBttns" outlined to="/settings" color="deep-orange">Propose Your Own Cookie</v-btn>
+          <v-btn class="homeBttns" outlined to="/proposecookie" color="deep-orange">Propose Your Own Cookie</v-btn>
         </v-row>
         <br>
         <v-row v-if="showInfo" align="center" justify="center">

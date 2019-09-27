@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import Login from './views/Login.vue'
 import Signup from './views/Signup.vue'
 import Settings from './views/Settings.vue'
+import ProposeCookie from './views/ProposeCookie.vue'
 
 
 const routes = [
@@ -26,6 +27,11 @@ const routes = [
       path: '/settings',
       name: 'settings',
       component: Settings
+    },
+    {
+      path: '/proposecookie',
+      name: 'proposecookie',
+      component: ProposeCookie
     }
   ]
 

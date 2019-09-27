@@ -6,7 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     //API Gateway Config
-    baseURL: 'https://n8etghaou1.execute-api.us-east-1.amazonaws.com/',
+    baseURL: 'https://c0l0vvsoa8.execute-api.us-east-1.amazonaws.com/',
     env: 'Prod/',
     
     signedIn: false,
