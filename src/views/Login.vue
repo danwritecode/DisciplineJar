@@ -10,14 +10,7 @@
                             label="Phone Number (+12223334444)"
                             outlined
                             type="text"
-                            v-model="form.username"
-                        ></v-text-field>
-                        <v-text-field
-                            label="Password"
-                            outlined
-                            type="password"
-                            v-model="form.password"
-                            v-on:keyup.enter="signIn"
+                            v-model="signUpForm.phonenumber"
                         ></v-text-field>
                 </v-card-text>
 
@@ -29,7 +22,7 @@
                         <router-link to="/signup">Don't have an account? Sign up!</router-link>
                     </v-card-text>
                     <v-spacer></v-spacer>
-                    <v-btn v-on:keyup.enter="signIn" @click="signIn" :disabled="(form.username === null || form.password === null)">Login</v-btn>
+                    <v-btn v-on:keyup.enter="validation" @click="validation" :disabled="(signUpForm.phonenumber === null)">Login</v-btn>
                 </v-card-actions>
             </v-card>
           </v-flex>
@@ -38,36 +31,69 @@
 </template>
 
 <script>
-import { Auth } from 'aws-amplify'
-import { AmplifyEventBus } from 'aws-amplify-vue'
-import { mapMutations } from 'vuex'
+var PhoneNumber = require( 'awesome-phonenumber' );
 
 export default {
-  name: 'home',
-  data() {
-    return {
-      form: {
-        username: null,
-        password: null
-      },
-      errorPost: false,
-      errorMessage: null,
-      posting: false
-    }
-  },
-  methods: {
-    signIn() {
-        this.errorPost = false;
-        this.posting = true;
+    name: 'home',
+    data() {
+        return {
+            signUpForm: {
+                phonenumber: null
+            },
+            posting: false,
+            successPost: false,
+            errorPost: false,
+            errorMessage: null,
+            bindProps: {
+                enabledCountryCode: true,
+                onlyCountries: ['US'],
+                disabledFormatting: true,
+                validCharactersOnly: true
+            }
+        }
+    },
+    methods: {
+            validation() {
+                var pn = new PhoneNumber(this.signUpForm.phonenumber);
 
-        const {username, password } = this.form
-        Auth.signIn({username, password})
-            .then(user => (console.log(user),
-                            this.$store.commit('mutateAuthState', true),
-                            setTimeout(() => (this.$router.push('/')), 1500)))
-            .catch(err => (console.log(err), this.errorMessage = err.message, this.errorPost = true, this.posting = false));
-    }
-  },
+                if(pn.isValid() === true) {
+                    this.errorPost = false
+                    const e164Formatted = pn.getNumber('e164')
+                    //check if user exists already
+                    this.checkIfUserAlreadyExists(e164Formatted)
+                }
+                else {
+                    this.errorPost = true
+                    this.errorMessage = 'Incorrect format, please follow this formatting: +12223334444'
+                }
+            },
+            signIn(phoneNum) {
+              this.posting = true
+              this.$ls.set('signedIn', true)
+              this.$ls.set('signedInUserPhoneNum', phoneNum)
+              this.$store.commit('mutateAuthState', true),
+              setTimeout(() => (this.$router.push('/')), 1500)
+            },
+            checkIfUserAlreadyExists(phoneNum) {
+                const apiUrl = this.$store.state.baseURL
+                const env = this.$store.state.env
+
+                console.log('Phone number is: ' + phoneNum)
+
+                axios.get(apiUrl + env + 'user/exists?phoneNum=' + phoneNum)
+                    .then(response => (console.log(response.data), this.determineSignUpOrSignIn(response.data, phoneNum)))
+                    .catch(error => (console.log(error)))
+            },
+            determineSignUpOrSignIn(exists, phoneNum) {
+                if(exists === true) {
+                  this.signIn(phoneNum)
+                }
+                else {
+                    this.errorPost = true
+                    this.errorMessage = 'This phone number does not exist. Please Signup.'
+                }
+            }
+        }
 }
 </script>
 

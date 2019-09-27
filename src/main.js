@@ -7,11 +7,12 @@ Vue.use(VueRouter);
 import store from './store'
 import vuetify from './plugins/vuetify';
 
-import Amplify, * as AmplifyModules from 'aws-amplify'
-import { AmplifyPlugin } from 'aws-amplify-vue'
-import config from './aws-exports'
-Amplify.configure(config)
-Vue.use(AmplifyPlugin, AmplifyModules)
+import VueLocalStorage from 'vue-localstorage'
+Vue.use(VueLocalStorage, {
+  name: 'ls',
+  bind: true //created computed members from your variable declarations
+})
+
 
 Vue.config.productionTip = false
 

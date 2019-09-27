@@ -34,7 +34,6 @@
 </template>
 
 <script>
-import { Auth } from 'aws-amplify'
 
 export default {
   data() {
@@ -46,24 +45,15 @@ export default {
   computed: {
       signedInState: function() {
         this.updateCurAuthUser()
-        return this.$store.state.signedIn || this.signedIn
+        return this.$store.state.signedIn || this.$ls.get('signedIn')
       }
   },
   beforeCreate() {
-      Auth.currentAuthenticatedUser()
-        .then(user => {
-          this.signedIn = true
-        })
-        .catch(() => (this.signedIn = false, console.log(this.signedIn)))
+
   },
   methods: {
     updateCurAuthUser() {
-      Auth.currentAuthenticatedUser()
-        .then(user => {
-          this.signedIn = true,
-          this.tactUserNm = user.username
-        })
-        .catch(() => (this.signedIn = false, console.log(this.signedIn)))
+
     }
   }
 };

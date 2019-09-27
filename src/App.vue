@@ -47,8 +47,6 @@
 
 <script>
   import { mapMutations } from 'vuex'
-  import { Auth } from 'aws-amplify'
-  import { AmplifyEventBus } from 'aws-amplify-vue'
 
   export default {
     data() {
@@ -59,34 +57,23 @@
     computed: {
       signedInState: function() {
         this.updateCurAuthUser()
-        return this.$store.state.signedIn || this.signedIn
+        return this.$store.state.signedIn || this.$ls.get('signedIn')
       }
     },
     beforeCreate() {
-      Auth.currentAuthenticatedUser()
-        .then(user => {
-          this.signedIn = true,
-          this.tactUserNm = user.username,
-          this.tactUserType = user.attributes['custom:UserType']
-        })
-        .catch(() => (this.signedIn = false, console.log(this.signedIn)))
+
     },
     created () {
       this.$vuetify.theme.dark = true;
     },
     methods: {
       signOut() {
-        Auth.signOut({ global: true })
-        .then(data => (this.$store.commit('mutateAuthState', false), this.signedIn = false, this.$router.push('/'), console.log('Signout Pushed')))
-        .catch(err => console.log(err));
+        this.$ls.remove('signedIn')
+        this.$ls.remove('signedInUserPhoneNum')
+        this.$store.commit('mutateAuthState', false);
       }, 
       updateCurAuthUser() {
-        Auth.currentAuthenticatedUser()
-          .then(user => {
-            this.signedIn = true,
-            this.tactUserNm = user.username
-          })
-          .catch(() => (this.signedIn = false, console.log(this.signedIn)))
+
       }
     }
   }

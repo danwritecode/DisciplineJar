@@ -2,67 +2,32 @@
     <v-container fluid fill-height>
         <v-layout align-center justify-center row>
           <v-flex>
-              <div v-if="formState === 'signUp'">
+              <div>
                 <v-card class="elevation-12 mx-auto" width="350">
-                    <v-card-title>Login</v-card-title>
-
+                    <v-card-title>Signup</v-card-title>
                     <v-card-text id="cardForm">
+                        <p>All we need is your phone number to get started.</p>
+                        <p>We promise not to share it. In fact, you are completely anonymous (we don't even know your name).</p>
                             <v-text-field
                                 label="Phone Number (+12223334444)"
                                 solo
                                 type="text"
-                                v-model="signUpForm.username"
-                            ></v-text-field>
-                            <v-text-field
-                                label="Password"
-                                solo
-                                type="password"
-                                v-model="signUpForm.password"
-                            ></v-text-field>
-                            <v-text-field
-                                label="Email"
-                                solo
-                                type="email"
-                                v-model="signUpForm.email"
-                                v-on:keyup.enter="signUp()"
+                                v-model="signUpForm.phonenumber"
+                                outlined
                             ></v-text-field>
                     </v-card-text>
 
-                    <v-alert v-if="errorPost" type="error">Uh oh, there was an issue: {{ errorMessage }}</v-alert>
+                    
 
                     <v-container>
+                        <v-alert v-if="successPost" type="success">Successfully signed up!</v-alert>
+                        <v-alert v-if="errorPost" type="error">Uh oh, there was an issue: {{ errorMessage }}</v-alert>
+                        <v-progress-linear v-if="posting" :indeterminate="posting"></v-progress-linear>
                         <v-card-actions>
-                                            <v-btn v-on:keyup.enter="signUp()" @click="signUp()" :disabled="(signUpForm.username === null || signUpForm.password === null || signUpForm.email === null)">Signup</v-btn>
+                            <v-btn v-on:keyup.enter="validation()" @click="validation()" :disabled="(signUpForm.phonenumber === null)">Signup</v-btn>
                         </v-card-actions>
                     </v-container>
                 </v-card>
-              </div>
-
-              <div v-if="formState === 'confirmSignUp'">
-                  <v-card class="elevation-12 mx-auto" width="350">
-                      <v-card-title>Confirm Email Code</v-card-title>
-
-                      <v-card-text id="cardForm">
-                            <v-text-field
-                                label="Confirmation Code"
-                                solo
-                                type="text"
-                                v-model="signUpForm.code"
-                                @click="resetCodeResentAlert()"
-                                v-on:keyup.enter="confirmSignUp()"
-                            ></v-text-field>
-                    </v-card-text>
-                    <v-alert v-if="confirmSuccess" type="success">Email confirmed!</v-alert>
-                    <v-alert v-if="confirmCodeResent" type="success">Code Resent!</v-alert>
-                    <v-alert v-if="errorPost" type="error">Uh oh, there was an issue: {{ errorMessage }}</v-alert>
-
-                    <v-container>
-                        <v-card-actions>
-                            <v-btn text @click="resendCode()">Resend Code</v-btn>
-                            <v-btn v-on:keyup.enter="confirmSignUp()" :disabled="signUpForm.code === null" @click="confirmSignUp()">Continue</v-btn>
-                        </v-card-actions>
-                    </v-container>
-                  </v-card>
               </div>
           </v-flex>
         </v-layout>
@@ -70,68 +35,86 @@
 </template>
 
 <script>
-import { Auth } from 'aws-amplify'
-import { AmplifyEventBus } from 'aws-amplify-vue'
-import { mapMutations } from 'vuex'
-import { mapState } from 'vuex';
+var PhoneNumber = require( 'awesome-phonenumber' );
+
 
 export default {
     name: 'home',
     data() {
         return {
             signUpForm: {
-                username: null,
-                password: null,
-                email: null,
-                code: null
+                phonenumber: null
             },
-            confirmSuccess: false,
-            confirmCodeResent: false,
+            posting: false,
+            successPost: false,
             errorPost: false,
             errorMessage: null,
-            formState: 'signUp',
+            bindProps: {
+                enabledCountryCode: true,
+                onlyCountries: ['US'],
+                disabledFormatting: true,
+                validCharactersOnly: true
+            }
         }
     },
     methods: {
-            resetCodeResentAlert() {
-                this.confirmCodeResent = false
-            },
-            signUp() {
-                const {username, password, email  } = this.signUpForm
-                Auth.signUp({
-                    username,
-                    password,
-                    attributes: {email}
-                })
-                .then(response => (console.log('Data logged: ' + response), this.formState = 'confirmSignUp', this.errorPost = false, this.errorMessage = ''))
-                .catch(error => (console.log(error), this.errorPost = true, this.errorMessage = error));
-            },
-            confirmSignUp() {
-                const {username, code } = this.signUpForm
-                console.log(code)
-                Auth.confirmSignUp(username, code)
-                .then(response => (console.log(response), 
-                        this.confirmSuccess = true,
-                        this.errorPost = false, this.errorMessage = '',
-                        this.signIn()))
-                .catch(error => (console.log(error), this.errorPost = true, this.errorMessage = error.message));
-            },
-            resendCode() {
-                const username = this.signUpForm.username
+            validation() {
+                var pn = new PhoneNumber(this.signUpForm.phonenumber);
 
-                Auth.resendSignUp(username)
-                .then(response => (this.confirmCodeResent = true,
-                                    setTimeout(() => (this.confirmCodeResent = false), 15000)))
-                .catch(error => (console.log('Error: ' + error), this.errorPost = true, this.errorMessage = error.message))
+                if(pn.isValid() === true) {
+                    this.errorPost = false
+                    const e164Formatted = pn.getNumber('e164')
+                    //check if user exists already
+                    this.checkIfUserAlreadyExists(e164Formatted)
+                }
+                else {
+                    this.errorPost = true
+                    this.errorMessage = 'Incorrect format, please follow this formatting: +12223334444'
+                }
             },
-            signIn() {
-                const {username, password } = this.signUpForm
-                Auth.signIn({username, password})
-                    .then(user => (console.log(user), 
-                            this.$store.commit('mutateAuthState', true),
-                            setTimeout(() => (this.$router.push('/')), 1500)))
-                    .catch(err => (console.log(err)));
+            signUp(phoneNum) {
+                const apiUrl = this.$store.state.baseURL
+                const env = this.$store.state.env
+
+                const user = {'phone_number': phoneNum }
+
+                this.posting = true
+
+                axios.post(apiUrl + env + 'user/signup', JSON.stringify(user))
+                    .then(response => (console.log(response.data), 
+                                        this.posting = false,
+                                        this.successPost = true,
+                                        setTimeout(() => (this.successPost = false, this.signIn(phoneNum)), 1500)))
+                    .catch(error => (console.log(error), this.errorPost = true))
+
             },
+            signIn(phoneNum) {
+                this.posting = true
+                this.$ls.set('signedIn', true)
+                this.$ls.set('signedInUserPhoneNum', phoneNum)
+                this.$store.commit('mutateAuthState', true),
+                setTimeout(() => (this.$router.push('/')), 1500)
+            },
+            checkIfUserAlreadyExists(phoneNum) {
+                const apiUrl = this.$store.state.baseURL
+                const env = this.$store.state.env
+
+                console.log('Phone number is: ' + phoneNum)
+
+                axios.get(apiUrl + env + 'user/exists?phoneNum=' + phoneNum)
+                    .then(response => (console.log(response.data), this.determineSignUpOrSignIn(response.data, phoneNum)))
+                    .catch(error => (console.log(error)))
+            },
+            determineSignUpOrSignIn(exists, phoneNum) {
+                if(exists === true) {
+                    this.errorPost = true
+                    this.errorMessage = 'Your Phone Number already exists, signing you in now.'
+                    setTimeout(() => (this.signIn(phoneNum)), 1500)
+                }
+                else {
+                    this.signUp(phoneNum)
+                }
+            }
         }
 }
 </script>

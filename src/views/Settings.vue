@@ -1,6 +1,6 @@
 <template>
      <v-container>
-         <v-progress-linear v-if="!form.Personal_Message_Tx" :indeterminate="!form.Personal_Message_Tx"></v-progress-linear>
+         <v-progress-linear v-if="loading" :indeterminate="loading"></v-progress-linear>
          <v-row v-else align-content="center" justify="center">
              <v-col>
                  <v-card>
@@ -27,7 +27,6 @@
 </template>
 
 <script>
-import { Auth } from 'aws-amplify'
 
 export default {
     data() {
@@ -44,19 +43,13 @@ export default {
                 jwtToken: null
             },
             posting: false,
+            loading: true,
             successPost: false,
             errorPost: false
         }
     },
-    beforeCreate() {
-        Auth.currentAuthenticatedUser()
-            .then(user => {
-                this.authedUser.user = user,
-                this.authedUser.jwtToken = user.signInUserSession.idToken.jwtToken,
-                this.authedUser.userId = this.tactUserId = user.attributes.sub,
-                this.getSettings()
-            })
-            .catch(err => console.log(err))
+    mounted() {
+        this.getSettings();
     },
     methods: {
         saveSettings() {
@@ -64,21 +57,16 @@ export default {
 
             const apiUrl = this.$store.state.baseURL
             const env = this.$store.state.env
-
-            const config = {
-                headers: {
-                    'Authorization': this.authedUser.jwtToken
-                    }
-                }
+            const phoneNum = this.$ls.get('signedInUserPhoneNum')
             
-            const userSettings = {'UserId': this.authedUser.userId,
+            const userSettings = {'PhoneNum': phoneNum,
                                     'Settings': {
                                         'ReceiveMotivationalVideo': this.form.Receive_MotivtnlVid_Bool,
                                         'ReceiveWorkoutPlan': this.form.Receive_Workout_Bool,
                                         'PersonalizedMessage': this.form.Personal_Message_Tx
                                     }}
 
-            axios.post(apiUrl + env + 'user/settings', JSON.stringify(userSettings), config)
+            axios.post(apiUrl + env + 'user/settings', JSON.stringify(userSettings))
                 .then(response => (console.log(response.data), 
                                     this.posting = false,
                                     this.successPost = true,
@@ -88,15 +76,10 @@ export default {
         getSettings() {
             const apiUrl = this.$store.state.baseURL
             const env = this.$store.state.env
+            const phoneNum = this.$ls.get('signedInUserPhoneNum')
 
-            const config = {
-                headers: {
-                    'Authorization': this.authedUser.jwtToken
-                    }
-                }
-
-            axios.get(apiUrl + env + 'user/settings?User_Id='+this.authedUser.userId, config)
-                .then(response => (console.log(response.data), this.form = response.data))
+            axios.get(apiUrl + env + 'user/settings?PhoneNum='+phoneNum)
+                .then(response => (console.log(response.data), this.form = response.data, this.loading = false))
                 .catch(error => (console.log(error)))
         }
     }
