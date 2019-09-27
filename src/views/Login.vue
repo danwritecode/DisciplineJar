@@ -22,7 +22,7 @@
                         <router-link to="/signup">Don't have an account? Sign up!</router-link>
                     </v-card-text>
                     <v-spacer></v-spacer>
-                    <v-btn v-on:keyup.enter="validation" @click="validation" :disabled="(signUpForm.phonenumber === null)">Login</v-btn>
+                    <v-btn v-on:keyup.enter="validation()" @click="validation()" :disabled="signUpForm.phonenumber === null">Login</v-btn>
                 </v-card-actions>
             </v-card>
           </v-flex>

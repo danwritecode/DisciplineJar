@@ -45,7 +45,7 @@ export default {
   computed: {
       signedInState: function() {
         this.updateCurAuthUser()
-        return this.$store.state.signedIn || this.$ls.get('signedIn')
+        return this.$store.state.signedIn || this.$ls.get('signedIn') === true
       }
   },
   beforeCreate() {

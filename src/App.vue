@@ -57,20 +57,19 @@
     computed: {
       signedInState: function() {
         this.updateCurAuthUser()
-        return this.$store.state.signedIn || this.$ls.get('signedIn')
+        return this.$store.state.signedIn || this.$ls.get('signedIn') === true
       }
-    },
-    beforeCreate() {
-
     },
     created () {
       this.$vuetify.theme.dark = true;
     },
     methods: {
       signOut() {
-        this.$ls.remove('signedIn')
-        this.$ls.remove('signedInUserPhoneNum')
+        console.log('Signout Called')
         this.$store.commit('mutateAuthState', false);
+        this.$ls.set('signedIn', false)
+        this.$ls.remove('signedInUserPhoneNum')
+        this.$router.push('/')
       }, 
       updateCurAuthUser() {
 
