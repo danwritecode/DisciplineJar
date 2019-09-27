@@ -56,8 +56,7 @@
     },
     computed: {
       signedInState: function() {
-        this.updateCurAuthUser()
-        return this.$store.state.signedIn || this.$ls.get('signedIn') === true
+        return this.$store.state.signedIn || this.checkAuthState()
       }
     },
     created () {
@@ -71,8 +70,13 @@
         this.$ls.remove('signedInUserPhoneNum')
         this.$router.push('/')
       }, 
-      updateCurAuthUser() {
-
+      checkAuthState() {
+        if(this.$ls.get('signedIn') === 'true') {
+          return true
+        }
+        else {
+          return false
+        }
       }
     }
   }
