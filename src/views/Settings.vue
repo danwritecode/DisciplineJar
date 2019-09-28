@@ -15,7 +15,7 @@
                         </v-card-text>
                         <v-container>
                             <v-alert v-if="settingsSuccessPost" type="success">Settings successfully saved!</v-alert>
-                            <v-alert v-if="settingsSuccessPost" type="error">Uh oh, there was an issue</v-alert>
+                            <v-alert v-if="settingsErrorPost" type="error">Uh oh, there was an issue</v-alert>
                             <v-progress-linear v-if="settingsPosting" :indeterminate="settingsPosting"></v-progress-linear>
                             <v-card-actions>
                                 <v-btn outlined @click="saveSettings()">Save</v-btn>
@@ -74,7 +74,7 @@ export default {
                                     this.settingsPosting = false,
                                     this.settingsSuccessPost = true,
                                     setTimeout(() => (this.settingsSuccessPost = false), 1500)))
-                .catch(error => (console.log(error), this.settingsSuccessPost = true))
+                .catch(error => (console.log(error), this.settingsErrorPost = true))
         },
         getSettings() {
             const apiUrl = this.$store.state.baseURL
