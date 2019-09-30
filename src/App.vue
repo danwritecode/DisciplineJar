@@ -8,6 +8,7 @@
             mini-variant
             permanent
             bottom
+            mini-variant-width="50"
           >
             <v-list dense>
               <v-list-item to="/">
