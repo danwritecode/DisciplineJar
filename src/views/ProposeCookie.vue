@@ -11,7 +11,7 @@
                             <v-textarea v-model="cookieProposal" label="Enter a cookie suggestion..." outlined></v-textarea>
                         </v-card-text>
                         <v-container>
-                            <v-alert v-if="proposalSuccessPost" type="success">Settings successfully saved!</v-alert>
+                            <v-alert v-if="proposalSuccessPost" type="success">Cookie submitted!</v-alert>
                             <v-alert v-if="proposalErrorPost" type="error">Uh oh, there was an issue</v-alert>
                             <v-progress-linear v-if="proposalPosting" :indeterminate="proposalPosting"></v-progress-linear>
                             <v-card-actions>

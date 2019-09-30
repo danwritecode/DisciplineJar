@@ -76,7 +76,7 @@ export default {
                 const apiUrl = this.$store.state.baseURL
                 const env = this.$store.state.env
 
-                const user = {'phone_number': phoneNum }
+                const user = {'phone_number': phoneNum, 'Active': true }
 
                 this.posting = true
 

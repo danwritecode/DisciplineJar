@@ -1,7 +1,8 @@
 <template>
-     <v-container>
-         <v-progress-linear v-if="loading" :indeterminate="loading"></v-progress-linear>
-         <div v-else>
+    <div>
+        <v-container>
+            <v-progress-linear v-if="loading" :indeterminate="loading"></v-progress-linear>
+            <div v-else>
             <v-row align-content="center" justify="center">
                 <v-col>
                     <v-card>
@@ -19,13 +20,25 @@
                             <v-progress-linear v-if="settingsPosting" :indeterminate="settingsPosting"></v-progress-linear>
                             <v-card-actions>
                                 <v-btn outlined @click="saveSettings()">Save</v-btn>
+                                <v-spacer></v-spacer>
+                                <v-btn v-if="form.Active" outlined color="error" @click="showUnsub = true">Unsubscribe from Texts</v-btn>
+                                <v-btn v-else outlined color="green" @click="updateUserStatus(true)">Subscribe to Texts</v-btn>
                             </v-card-actions>
                         </v-container>
                     </v-card>
                 </v-col>
             </v-row>
-         </div>
-      </v-container>
+            </div>
+        </v-container>
+
+        <v-overlay v-if="showUnsub" opacity="0.75">
+            <p>Are you sure you want to ubsubscribe?</p>
+            <v-row align-content="center" justify="center">
+                <v-btn @click="updateUserStatus(false)" class="unsubOverlayBtns" outlined color="error">Yes</v-btn>
+                <v-btn @click="showUnsub = false" class="unsubOverlayBtns" outlined>No</v-btn>
+            </v-row>
+        </v-overlay>
+    </div>
 </template>
 
 <script>
@@ -36,7 +49,8 @@ export default {
             form: {
                 Personal_Message_Tx: null,
                 Receive_MotivtnlVid_Bool: false,
-                Receive_Workout_Bool: false
+                Receive_Workout_Bool: false,
+                Active: true
             },
             disciplineJar: true,
             authedUser: {
@@ -44,11 +58,15 @@ export default {
                 userId: null, 
                 jwtToken: null
             },
+            showUnsub: false,
             loading: true,
 
             settingsPosting: false,
             settingsSuccessPost: false,
             settingsErrorPost: false,
+
+            statusSuccessPost: false,
+            statusErrorPost: false,
         }
     },
     mounted() {
@@ -84,11 +102,31 @@ export default {
             axios.get(apiUrl + env + 'user/settings?PhoneNum='+phoneNum)
                 .then(response => (console.log(response.data), this.form = response.data, this.loading = false))
                 .catch(error => (console.log(error)))
+        },
+        updateUserStatus(status) {
+            this.settingsPosting = true
+
+            const apiUrl = this.$store.state.baseURL
+            const env = this.$store.state.env
+            const phoneNum = this.$ls.get('signedInUserPhoneNum')
+            
+            const userSettings = {'PhoneNum': phoneNum,
+                                    'Active': status}
+
+            axios.post(apiUrl + env + 'user/status', JSON.stringify(userSettings))
+                .then(response => (console.log(response.data), 
+                                    this.settingsPosting = false,
+                                    this.settingsSuccessPost = true,
+                                    this.showUnsub = false,
+                                    setTimeout(() => (this.settingsSuccessPost = false, this.$router.go(0)), 1500)))
+                .catch(error => (console.log(error), this.settingsErrorPost = true))
         }
     }
 }
 </script>
 
 <style scoped>
-
+.unsubOverlayBtns {
+    margin: 0 10px 10px 10px;
+}
 </style>
