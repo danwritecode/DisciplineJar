@@ -4,7 +4,7 @@
             <v-row align-content="center" justify="center">
                 <v-col>
                     <v-card>
-                        <v-card-title>Submit your own cookie</v-card-title>
+                        <v-card-title>Submit cookie</v-card-title>
                         <v-card-text>
                             <p>Have a cookie idea for the Discipline Jar? Submit it and we'll work it into the rotation.</p>
                             <p>Follow the format: Do you want..... Discipline and sacrifice now.</p>
