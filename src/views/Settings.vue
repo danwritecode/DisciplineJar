@@ -32,7 +32,7 @@
         </v-container>
 
         <v-overlay v-if="showUnsub" opacity="0.75">
-            <p>Are you sure you want to ubsubscribe?</p>
+            <p>Are you sure you want to unsubscribe?</p>
             <v-row align-content="center" justify="center">
                 <v-btn @click="updateUserStatus(false)" class="unsubOverlayBtns" outlined color="error">Yes</v-btn>
                 <v-btn @click="showUnsub = false" class="unsubOverlayBtns" outlined>No</v-btn>
