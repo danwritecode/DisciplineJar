@@ -2,8 +2,8 @@
   <v-container fill-height>
     <v-row>
       <v-col cols="12">
-        <v-row align="center" justify="center" style="height:400px;">
-          <h1 id="disciplineHeader">DISCIPLINE JAR</h1>
+        <v-row align="center" justify="center">
+          <img id="jarImg" src="../assets/discipline-jar-icon.svg" width="400">
         </v-row>
         <v-row v-if="!signedInState" align="center" justify="center">
           <v-btn class="homeBttns" outlined to="/login">Login</v-btn>
@@ -74,5 +74,9 @@ export default {
 
 .homeBttns {
   margin: 0 10px 10px 10px;
+}
+
+#jarImg {
+  margin-bottom: 100px;
 }
 </style>
